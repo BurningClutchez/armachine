@@ -38,41 +38,17 @@ signal.signal(signal.SIGTERM, handle_shutdown)      # systemd shutdown command
 signal.signal(signal.SIGINT, handle_shutdown)       # keyboard interrupt
 
 
-def is_docker():
-    """
-    Test to check if running inside a docker/container
-    returns: Boolean
-    """
-    path = '/proc/self/cgroup'
-
-    if os.path.exists('/.dockerenv'):
-        return True
-
-    if os.path.isfile(path):
-        with open(path) as f:
-            return any('docker' in line for line in f)
-
-    return False
-
-
 def get_host():
-    host = cfg.arm_config['WEBSERVER_IP']
-    # Check if auto ip address 'x.x.x.x' or if inside docker - set internal ip from host and use WEBSERVER_IP for notify
-    if host == 'x.x.x.x' or is_docker():
-        # autodetect host IP address
-        from netifaces import interfaces, ifaddresses, AF_INET
-        ip_list = []
-        for interface in interfaces():
-            inet_links = ifaddresses(interface).get(AF_INET, [])
-            for link in inet_links:
-                ip = link['addr']
-                if ip != '127.0.0.1':
-                    ip_list.append(ip)
-        if len(ip_list) > 0:
-            host = ip_list[0]
-        else:
-            host = '127.0.0.1'
-    return host
+    """
+    Return the address the web server should bind to.
+
+    WEBSERVER_IP is the address advertised in notifications/display. Binding to a
+    single autodetected address only exposes the UI on whichever interface happens
+    to be listed first (e.g. tailscale0), hiding it from the LAN or vice versa.
+    Bind to all interfaces so the UI is reachable from every network the host is on
+    (LAN, Tailscale, docker port mapping). Set ARM_WEBSERVER_BIND to restrict it.
+    """
+    return os.environ.get('ARM_WEBSERVER_BIND', '0.0.0.0')
 
 
 # Start ARM using waitress, default number of threads is "4", set ARM count to "40"
