@@ -183,3 +183,5 @@ removed/*
 /installed
 
 arm.yaml
+docker.compose.yml
+docker-setup.sh
