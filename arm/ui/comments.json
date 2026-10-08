@@ -43,7 +43,7 @@
   "LOGLEVEL": "# Log level.  DEBUG, INFO, WARNING, ERROR, CRITICAL\n# The default is INFO\n# If you are experiencing difficulties set this to DEBUG",
   "LOGLIFE": "# How long to let log files live before deleting (in days)\n# Set to 0 to disable",
   "DBFILE": "# Path to ARM database file",
-  "WEBSERVER_IP": "# IP address of web server (this machine)\n# Use x.x.x.x to autodetect the IP address to use",
+  "WEBSERVER_IP": "# IP address of web server (this machine), used in notifications and links\n# Use x.x.x.x to autodetect the IP address to use (LAN addresses are preferred over Tailscale/VPN)\n# The web server always listens on all interfaces (LAN, Tailscale, etc.);\n# set the ARM_WEBSERVER_BIND environment variable to restrict it to one address",
   "WEBSERVER_PORT": "# Port for web server",
   "UI_BASE_URL": "# Base URL to use for notifications and display purposes\n#Be sure to include protocol and port if needed (e.g. http://example.com:8091 or https://example.com)",
   "SET_MEDIA_PERMISSIONS": "# Enabling this setting will allow you to adjust the default file permissions of the outputted files\n# The default value is set to 777 for read/write/execute for all users, but can be changed below using the \"CHMOD_VALUE\" setting\n# This setting is helpful when storing the data locally on the system",

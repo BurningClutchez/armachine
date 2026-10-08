@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Collection of utility functions"""
 import datetime
+import ipaddress
 import os
 import logging
 import subprocess
@@ -733,13 +734,22 @@ def check_ip():
     if cfg.arm_config['WEBSERVER_IP'] != 'x.x.x.x':
         return cfg.arm_config['WEBSERVER_IP']
     # autodetect host IP address
-    ip_list = []
+    # Prefer LAN addresses, then VPN/overlay addresses (Tailscale uses 100.64.0.0/10),
+    # skipping loopback and docker bridge (172.x) addresses entirely
+    lan_ips = []
+    other_ips = []
     for interface in interfaces():
         inet_links = ifaddresses(interface).get(AF_INET, [])
         for link in inet_links:
             ip_address = link['addr']
-            if ip_address != '127.0.0.1' and not ip_address.startswith('172'):
-                ip_list.append(ip_address)
+            if ip_address == '127.0.0.1' or ip_address.startswith('172'):
+                continue
+            if interface.startswith(('tailscale', 'docker', 'br-', 'veth')) \
+                    or ipaddress.ip_address(ip_address) in ipaddress.ip_network('100.64.0.0/10'):
+                other_ips.append(ip_address)
+            else:
+                lan_ips.append(ip_address)
+    ip_list = lan_ips + other_ips
     if len(ip_list) > 0:
         return ip_list[0]
     return '127.0.0.1'
